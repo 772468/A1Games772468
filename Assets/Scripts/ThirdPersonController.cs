@@ -86,6 +86,7 @@ namespace StarterAssets
         private float _rotationVelocity;
         private float _verticalVelocity;
         private float _terminalVelocity = 53.0f;
+        
 
         // timeout deltatime
         private float _jumpTimeoutDelta;
@@ -135,7 +136,7 @@ namespace StarterAssets
         private void Start()
         {
             _cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
-            
+
             _hasAnimator = TryGetComponent(out _animator);
             _controller = GetComponent<CharacterController>();
             _input = GetComponent<StarterAssetsInputs>();
@@ -267,9 +268,22 @@ namespace StarterAssets
 
             Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
 
+            float LadderGrabDist = .4f;
+            float avoidfloorDist = .4f;
+            if (Physics.Raycast(transform.position + Vector3.up * avoidfloorDist, targetDirection, out RaycastHit raycasthit, LadderGrabDist))
+            {
+                targetDirection.x = 0.0f;
+                targetDirection.y = targetDirection.z + 1f;
+                targetDirection.z = 0.0f;
+                _verticalVelocity = 0.0f;
+                _speed = targetSpeed;
+                Grounded = true;
+            }
+           
             // move the player
             _controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) +
                              new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
+
 
             // update animator if using character
             if (_hasAnimator)
@@ -278,7 +292,7 @@ namespace StarterAssets
                 _animator.SetFloat(_animIDMotionSpeed, inputMagnitude);
             }
         }
-
+      
         private void JumpAndGravity()
         {
             if (Grounded)

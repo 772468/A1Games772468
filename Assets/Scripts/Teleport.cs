@@ -1,16 +1,13 @@
 using UnityEngine;
 
-public class Teleport : MonoBehaviour
+public class teleport : MonoBehaviour
 {
     public Transform playerl, Destination;
     public GameObject Player;
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
-        {
-            Player.SetActive(false);
-            playerl.position = Destination.position;
-            Player.SetActive(true);
-        }
+        Player.SetActive(false);
+        playerl.position = Destination.position;
+        Player.SetActive(true);
     }
 }
