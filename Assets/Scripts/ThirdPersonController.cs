@@ -21,6 +21,9 @@ namespace StarterAssets
         [Tooltip("Sprint speed of the character in m/s")]
         public float SprintSpeed = 5.335f;
 
+        [Tooltip("Alter how fast the player runs across the wall.")]
+        public float WallRunSpeed;
+
         [Tooltip("How fast the character turns to face movement direction")]
         [Range(0.0f, 0.3f)]
         public float RotationSmoothTime = 0.12f;
@@ -86,8 +89,16 @@ namespace StarterAssets
         private float _rotationVelocity;
         private float _verticalVelocity;
         private float _terminalVelocity = 53.0f;
-        
+        private bool _IsClimbingLadder;
 
+        // MStates
+        public MovementState state;
+        public enum MovementState
+        {
+            wallrunning
+        }
+        public bool wallrunning;
+      
         // timeout deltatime
         private float _jumpTimeoutDelta;
         private float _fallTimeoutDelta;
@@ -123,7 +134,14 @@ namespace StarterAssets
             }
         }
 
-
+        private void Statehandler()
+        {
+            if (wallrunning)
+            {
+                state = MovementState.wallrunning;
+                MoveSpeed = WallRunSpeed;
+            }
+        }
         private void Awake()
         {
             // get a reference to our main camera
@@ -267,10 +285,28 @@ namespace StarterAssets
 
 
             Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
-
-            float LadderGrabDist = .4f;
-            float avoidfloorDist = .4f;
-            if (Physics.Raycast(transform.position + Vector3.up * avoidfloorDist, targetDirection, out RaycastHit raycasthit, LadderGrabDist))
+            if (!_IsClimbingLadder)
+            {
+                float LadderGrabDist = .4f;
+                float avoidfloorDist = .4f;
+                if (Physics.Raycast(transform.position + Vector3.up * avoidfloorDist, targetDirection, out RaycastHit raycasthit, LadderGrabDist))
+                {
+                    wallrunning = false;
+                    GrabLadder();
+                }
+            } else
+            {
+                // Isclimbing ladder
+                float LadderGrabDist = .4f;
+                float avoidfloorDist = .4f;
+                if (!Physics.Raycast(transform.position + Vector3.up * avoidfloorDist, targetDirection, out RaycastHit raycasthit, LadderGrabDist))
+                {
+                    DropLadder();
+                    _verticalVelocity = 14f;
+                }
+            }
+           
+           if (_IsClimbingLadder)
             {
                 targetDirection.x = 0.0f;
                 targetDirection.y = targetDirection.z + 1f;
@@ -280,7 +316,7 @@ namespace StarterAssets
                 Grounded = true;
             }
            
-            // move the player
+           // move the player
             _controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) +
                              new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
 
@@ -292,7 +328,14 @@ namespace StarterAssets
                 _animator.SetFloat(_animIDMotionSpeed, inputMagnitude);
             }
         }
-      
+      private void GrabLadder()
+        {
+            _IsClimbingLadder = true;
+        }
+    private void DropLadder()
+        {
+            _IsClimbingLadder = false;
+        }
         private void JumpAndGravity()
         {
             if (Grounded)
