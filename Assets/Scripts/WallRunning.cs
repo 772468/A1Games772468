@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WallRunnning : MonoBehaviour
+public class WallRunning : MonoBehaviour
 {
     [Header("WallRun")]
     public LayerMask WhatIsWall;
@@ -53,8 +53,8 @@ public class WallRunnning : MonoBehaviour
 
     private void CheckWall()
     {
-        WallRight = Physics.Raycast(transform.position, Orientation.right, out RightwallHit, wallCheckDist, WhatIsWall);
-        WallLeft = Physics.Raycast(transform.position, -Orientation.right, out LeftwallHit, wallCheckDist, WhatIsWall);
+        WallRight = Physics.Raycast(transform.position, Orientation.right, out RightwallHit, wallCheckDist, layerMask: WhatIsWall);
+        WallLeft = Physics.Raycast(transform.position, -Orientation.right, out LeftwallHit, wallCheckDist, layerMask: WhatIsWall);
     }
 
     private bool AboveGround()
