@@ -9,5 +9,6 @@ public class CoinGet : MonoBehaviour
     {
         Coin.SetActive(false);
         CoinAmount = CoinAmount + 1;
+        Debug.Log(CoinAmount);
     }
 }
